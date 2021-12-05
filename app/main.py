@@ -1,4 +1,4 @@
-from re import U
+from typing import List, Optional
 from fastapi import FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
 from random import randrange
@@ -40,29 +40,29 @@ def find_index_user(id):
         if p['id'] == id:
             return i 
 
-@app.post("/singup", status_code=status.HTTP_201_CREATED)
+@app.post("/singup", status_code=status.HTTP_201_CREATED, response_model=schemas.userrespon)
 def create_user(user: schemas.createuser, db: Session = Depends(get_db)):
     new_user = models.user(**user.dict())
     db.add(new_user)
     db.commit()
-    db.refresh(new_user)
-    return {"data" : new_user}
+    db.refresh(new_user)    
+    return new_user
 
-@app.get("/user")
+@app.get("/user", response_model=List[schemas.userrespon])
 def get_user(db: Session = Depends(get_db)):
     user = db.query(models.user).all()
-    return {"data": user}
+    return user
 
-@app.get("/user/{id}")
+@app.get("/user/{id}", response_model=schemas.userrespon)
 def get_user(id: int, db: Session = Depends(get_db)):
     user = db.query(models.user).filter(models.user.id == id).first()
 
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"post with id: {id} was not found")
-    return{"post_detail": user}
+    return user
 
-@app.put("/Updateuser/{id}", status_code=status.HTTP_201_CREATED)  
+@app.put("/Updateuser/{id}", status_code=status.HTTP_201_CREATED, response_model=schemas.userrespon)  
 def update_post(id: int, update_user: schemas.createuser, db: Session = Depends(get_db)):
 
     user_query = db.query(models.user).filter(models.user.id == id)
@@ -77,7 +77,7 @@ def update_post(id: int, update_user: schemas.createuser, db: Session = Depends(
 
     db.commit()
 
-    return{"data": user_query.first()}
+    return user_query.first()
 
 @app.delete("/delete/{id}", status_code=status.HTTP_201_CREATED)
 def delete_post(id: int, db: Session = Depends(get_db)):
