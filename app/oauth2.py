@@ -1,5 +1,3 @@
-import re
-from fastapi.security.oauth2 import OAuth2
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from . import schemas
@@ -29,10 +27,10 @@ def create_access_token(data: dict):
 def verify_access_token(token: str, credentials_exception):
 
     try:
-
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             id: str = payload.get("user_id")
-            if id in None:
+
+            if id is None:
                 raise credentials_exception
             token_data = schemas.TokenData(id=id)
     except JWTError:
@@ -43,6 +41,6 @@ def verify_access_token(token: str, credentials_exception):
 
 def get_current_user(token: str = Depends(OAuth2_scheme)):
     credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
-    detail=f"could not validate credentials", headers= {"WWW-Authenticate": "Bearer"})
+    detail=f"could not validate credentials", headers= {"WWW-Authorization": "Bearer"})
 
     return verify_access_token(token, credentials_exception)

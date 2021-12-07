@@ -1,11 +1,7 @@
-from sys import prefix
+from codecs import decode
 from typing import List
 from fastapi import FastAPI, status, HTTPException, Depends, APIRouter
-from fastapi.params import Body
 from random import randrange
-import psycopg2
-from psycopg2.extras import RealDictCursor
-import time
 from sqlalchemy.orm import Session
 from .. import models, schemas, utils, oauth2
 from ..database import get_db
@@ -26,12 +22,13 @@ def create_user(user: schemas.createuser, db: Session = Depends(get_db)):
     return new_user
 
 @router.get("/getuser", response_model=List[schemas.userrespon])
-def get_user(db: Session = Depends(get_db)):
+def get_user(db: Session = Depends(get_db),  user_id: int = Depends(oauth2.get_current_user)):
     user = db.query(models.user).all()
+    print(user_id)
     return user
 
 @router.get("/user/{id}", response_model=schemas.userrespon)
-def get_user(id: int, db: Session = Depends(get_db)):
+def get_user(id: int, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
     user = db.query(models.user).filter(models.user.id == id).first()
 
     if not user:
@@ -40,7 +37,7 @@ def get_user(id: int, db: Session = Depends(get_db)):
     return user
 
 @router.put("/updateuser/{id}", status_code=status.HTTP_201_CREATED, response_model=schemas.userrespon)  
-def update_post(id: int, update_user: schemas.createuser, db: Session = Depends(get_db)):
+def update_post(id: int, update_user: schemas.createuser, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
 
     user_query = db.query(models.user).filter(models.user.id == id)
 
@@ -57,7 +54,7 @@ def update_post(id: int, update_user: schemas.createuser, db: Session = Depends(
     return user_query.first()
 
 @router.delete("/deleteuser/{id}", status_code=status.HTTP_201_CREATED)
-def delete_post(id: int, db: Session = Depends(get_db)):
+def delete_post(id: int, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
 
     user = db.query(models.user).filter(models.user.id == id)
 
