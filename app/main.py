@@ -3,9 +3,11 @@ from random import randrange
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
+
+from app.schemas import post
 from . import models
 from .database import engine, get_db
-from .routers import user, auth
+from .routers import user, auth, Post
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -40,3 +42,4 @@ def find_index_user(id):
 
 app.include_router(user.router)
 app.include_router(auth.router)
+app.include_router(Post.router)

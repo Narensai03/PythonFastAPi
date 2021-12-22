@@ -1,6 +1,25 @@
-from typing import Optional
+from typing import Optional, Type
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
+
+
+class postBase(BaseModel):
+    title:str
+    content:str
+
+class Createpost(postBase):
+    pass
+
+class post(postBase):
+    id: int
+    create_at: datetime
+
+    class Config:
+        orm_mode = True
+# class Updatepost(BaseModel):
+#     title:str
+#     content:str 
+
 
 class user(BaseModel):
     email:EmailStr
